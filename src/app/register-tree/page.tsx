@@ -124,9 +124,17 @@ export default function RegisterTreePage() {
     }
   };
 
-  if (!project || !cluster) return <div className="p-4 text-center">Cannot register tree: No valid project or cluster context available.</div>;
-
-  if (!project || !cluster) return <div className="p-4 flex items-center justify-center text-muted-foreground">Cannot register tree: No valid project or cluster context available.</div>;
+  if (project === undefined || cluster === undefined) return <div className="p-4 text-center mt-10">Loading database context...</div>;
+  if (!project || !cluster) return (
+    <div className="p-8 text-center max-w-md mx-auto mt-10 bg-red-50 rounded-xl border border-red-200">
+      <h3 className="text-red-800 font-bold text-lg mb-2">No Project Assigned</h3>
+      <p className="text-red-700 mb-4">Your account is not assigned to any Project or Cluster. The security system (RLS) is blocking access.</p>
+      <p className="text-sm text-red-600 font-mono text-left bg-red-100 p-2 rounded">
+        Did you run the setup SQL in Supabase Dashboard -> SQL Editor? Make sure it says 'Success'.
+      </p>
+      <Button onClick={() => window.location.reload()} className="mt-4" variant="outline">Refresh & Try Again</Button>
+    </div>
+  );
 
   return (
     <div className="container mx-auto p-4 max-w-2xl pb-20">
