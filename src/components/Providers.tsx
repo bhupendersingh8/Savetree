@@ -2,7 +2,7 @@
 
 import { useEffect, useState, createContext, useContext } from "react";
 import { supabase } from "@/lib/supabase";
-import { processSyncQueue } from "@/lib/db";
+import { processSyncQueue, syncDownstream } from "@/lib/db";
 import type { User } from "@supabase/supabase-js";
 import { AlertCircle } from "lucide-react";
 
@@ -37,18 +37,27 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-      if (session?.user) fetchProfile(session.user.id);
-      else setLoading(false);
+      if (session?.user) {
+        fetchProfile(session.user.id);
+        syncDownstream();
+      } else {
+        setLoading(false);
+      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      if (session?.user) fetchProfile(session.user.id);
-      else setProfile(null);
+      if (session?.user) {
+        fetchProfile(session.user.id);
+        syncDownstream();
+      } else {
+        setProfile(null);
+      }
     });
 
     const handleOnline = () => {
       processSyncQueue();
+      syncDownstream();
     };
     window.addEventListener('online', handleOnline);
 

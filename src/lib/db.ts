@@ -111,3 +111,42 @@ export const processSyncQueue = async () => {
     }
   }
 };
+
+
+export const syncDownstream = async () => {
+  if (!navigator.onLine || !supabase) return;
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return;
+
+    // Fetch projects
+    const { data: projects } = await supabase.from('projects').select('*');
+    if (projects) {
+      await db.projects.clear();
+      await db.projects.bulkPut(projects);
+    }
+
+    // Fetch clusters
+    const { data: clusters } = await supabase.from('clusters').select('*');
+    if (clusters) {
+      await db.clusters.clear();
+      await db.clusters.bulkPut(clusters);
+    }
+    
+    // Fetch trees
+    const { data: trees } = await supabase.from('trees').select('*');
+    if (trees) {
+      await db.trees.clear();
+      await db.trees.bulkPut(trees);
+    }
+    
+    // Fetch tasks
+    const { data: tasks } = await supabase.from('tasks').select('*');
+    if (tasks) {
+      await db.tasks.clear();
+      await db.tasks.bulkPut(tasks);
+    }
+  } catch (e) {
+    console.error('Downstream sync failed', e);
+  }
+};
