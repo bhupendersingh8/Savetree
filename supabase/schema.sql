@@ -266,3 +266,14 @@ SELECT
     status,
     risk_level
 FROM trees;
+
+-- MISSING RLS POLICIES FOR ORGS AND PROJECTS
+CREATE POLICY "Users can read their org" ON organizations FOR SELECT USING (
+    id = (SELECT organization_id FROM profiles WHERE id = auth.uid())
+);
+CREATE POLICY "Users can read projects in their org" ON projects FOR SELECT USING (
+    organization_id = (SELECT organization_id FROM profiles WHERE id = auth.uid())
+);
+CREATE POLICY "Users can read profiles in their org" ON profiles FOR SELECT USING (
+    organization_id = (SELECT organization_id FROM profiles p WHERE p.id = auth.uid()) OR id = auth.uid()
+);
